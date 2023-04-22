@@ -1,4 +1,5 @@
 from Solubilitylib import *
+import sys
 
 class TextCNN(nn.Module):
     def __init__(self, vocab_size, embed_size, kernel_sizes, num_channels,
@@ -102,8 +103,8 @@ def evaluate_accuracy_gpu(net, data_iter, device=None):
     return zz0,zzlabel0
   
 class assesmentDataset(Dataset):
-    def __init__(self, tokenizer, split = 'test', max_length=1200):
-        self.valFolderPath = '/home/bli/logbacktrain/ProteinSolubilityPrediction/ProtSol/own_dataset'
+    def __init__(self, tokenizer, own_file_path, split = 'test', max_length=1200):
+        self.valFolderPath = own_file_path
         self.valFilePath = os.path.join(self.valFolderPath, 'own_data.csv')
         self.valbio = os.path.join(self.valFolderPath, 'own_data.fasta')
         self.seqs, self.labels, self.bioinfo = self.load_dataset(self.valFilePath, self.valbio)
@@ -140,6 +141,12 @@ class assesmentDataset(Dataset):
         sample['bioinfo'] = torch.tensor(self.bioinfo[idx], dtype=torch.float32)
 
         return sample
+    
+own_data_path = sys.argv[1]
+if not os.path.exists(own_data_path):
+    print("own_data.csv and own_data.fasta files are not exist")
+    sys.exit()
+
 print("the best model loading...")
 tokenizer = BertTokenizer.from_pretrained("Rostlab/prot_bert_bfd" )
 rnn_net = get_rnn(vocab_size = tokenizer.vocab_size, embed_size=64, num_hiddens=64, num_layers=2)
@@ -154,14 +161,15 @@ net.load_state_dict(checkpoint['net'], False)
 net.eval()
 devices = try_all_gpus()
 
-print("your own data loading...")
-test_ass = assesmentDataset(tokenizer = tokenizer, split = 'val', max_length=1200)
+print("loading your own data ...")
+test_ass = assesmentDataset(tokenizer = tokenizer, own_file_path = own_data_path, split = 'val', max_length=1200)
 test_asses = DataLoader(test_ass, batch_size = 32, shuffle = False)
 zzz = evaluate_accuracy_gpu(net, test_asses, device=devices)
 y_hat = zzz[0].argmax(1).cpu().numpy()
 
-df = pd.read_csv("/home/bli/logbacktrain/ProteinSolubilityPrediction/ProtSol/own_dataset/own_data.csv", header = 0)
+csv_path = own_data_path + "own_data.csv"
+df = pd.read_csv(csv_path, header = 0)
 df = df.assign(y_hat=y_hat)
-df.to_csv("/home/bli/logbacktrain/ProteinSolubilityPrediction/ProtSol/own_dataset/y_hat_own_data.csv",index=False)
+df.to_csv(csv_path,index=False)
 
 print("Prediction completed, plz check the ((y_hat_own_data.csv)) file in (own_dataset) folder")
