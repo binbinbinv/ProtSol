@@ -19,7 +19,7 @@ own_data_tesing.py: predicts the soluble tags corresponding to the amino acid se
 Example:
 
 ```shell
-python own_data_tesing.py . /own_dataset/
+python own_data_tesing.py ./own_dataset/
 ```
 
 Solubilitylib.py: some basic libraries for the model, mainly for data processing, both training and prediction will be used.
