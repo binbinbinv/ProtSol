@@ -1,2 +1,2 @@
-download the pre-train bert model file from https://drive.google.com/file/d/1zNh-fxyPDugCFB2Z8SrOAvtTAPDsXhDi/view?usp=share_link
+download all pre-train bert model file from https://drive.google.com/drive/folders/1rFk9gxXBTW8fNmsH-VifgjZaCDSFXX32?usp=drive_link
 and put it in this file folder.
