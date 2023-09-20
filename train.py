@@ -1,5 +1,8 @@
 from Solubilitylib import *
 
+bert_model_path = "model"
+checkpoint_path = "checkpoint"
+
 class kmersCNN(nn.Module):
     def __init__(self, vocab_size, embed_size, kernel_sizes, num_channels,
                  **kwargs):
@@ -40,7 +43,7 @@ class BiRNN(nn.Module):
 class bert_cla(nn.Module):
   def __init__(self,cnn_net, rnn_net, n_classes=2):
     super(bert_cla, self).__init__()
-    self.bert = BertModel.from_pretrained("/zdata/users/libin/ProteinSolubilityPrediction/model")
+    self.bert = BertModel.from_pretrained(bert_model_path)
     self.drop1 = nn.Dropout(p=0.2)
     self.drop2 = nn.Dropout(p=0.5)
     self.drop3 = nn.Dropout(p=0.5)
@@ -103,8 +106,8 @@ def main(net, train_iter, test_iter, val_iter, val1_iter, loss, trainer, num_epo
             f' loss {metric[0] / metric[2]:.3f}, train acc {metric[1] / metric[3]:.3f}, test acc {test_acc:.3f}, val acc {val_acc:.3f}, val1 acc {val1_acc:.3f}'\
             f' | {metric[2]*num_epochs/timer.sum():.1f} examples/sec on {str(devices)}') 
 
-        if not os.path.isdir('/home/bli/logbacktrain/bin_ProtSol/checkpoint'):
-            os.mkdir('/home/bli/logbacktrain/bin_ProtSol/checkpoint')
+        if not os.path.isdir(checkpoint_path):
+            os.mkdir(checkpoint_path)
 
         if val1_acc >= best_acc:
             best_acc = val1_acc
@@ -113,10 +116,10 @@ def main(net, train_iter, test_iter, val_iter, val1_iter, loss, trainer, num_epo
               'optimizer':trainer.state_dict(),
               "epoch": epoch
               }
-            torch.save(checkpoint, '/home/bli/logbacktrain/bin_ProtSol/checkpoint/bestmodel.pkl')
+            torch.save(checkpoint, checkpoint_path + '/bestmodel.pkl')
             
 if __name__ == '__main__':
-    tokenizer = BertTokenizer.from_pretrained("/zdata/users/libin/ProteinSolubilityPrediction/model")
+    tokenizer = BertTokenizer.from_pretrained(bert_model_path)
     rnn_net = get_rnn(vocab_size = tokenizer.vocab_size, embed_size=64, num_hiddens=64, num_layers=2)
     embed_size, kernel_sizes, nums_channels = 1, [1, 2, 3, 4, 5, 6, 7, 8], [100, 100, 100, 100, 100, 100, 100, 100]
     cnn_net = kmersCNN(tokenizer.vocab_size, embed_size, kernel_sizes, nums_channels)
@@ -155,7 +158,7 @@ if __name__ == '__main__':
     start_epoch = 0
     
     if RESUME:
-        path_checkpoint = "/home/bli/logbacktrain/bin_ProtSol/checkpoint/bestmodel.pkl"
+        path_checkpoint = checkpoint_path + "/bestmodel.pkl"
         checkpoint = torch.load(path_checkpoint)
         net.load_state_dict(checkpoint['net'])
         net.cuda()

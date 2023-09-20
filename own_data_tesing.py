@@ -1,6 +1,9 @@
 from Solubilitylib import *
 import sys
 
+bert_model_path = "model"
+checkpoint_path = "checkpoint"
+
 class TextCNN(nn.Module):
     def __init__(self, vocab_size, embed_size, kernel_sizes, num_channels,
                  **kwargs):
@@ -41,7 +44,7 @@ class BiRNN(nn.Module):
 class bert_cla(nn.Module):
   def __init__(self,cnn_net, rnn_net, n_classes=2):
     super(bert_cla, self).__init__()
-    self.bert = BertModel.from_pretrained("Rostlab/prot_bert_bfd")
+    self.bert = BertModel.from_pretrained(bert_model_path)
     self.drop1 = nn.Dropout(p=0.2)
     self.drop2 = nn.Dropout(p=0.5)
     self.drop3 = nn.Dropout(p=0.5)
@@ -80,7 +83,6 @@ def evaluate_accuracy_gpu(net, data_iter, device=None):
     if isinstance(net, nn.Module):
         if not device:
             device = next(iter(net.parameters())).device
-    metric = Accumulator(2)
     i = 1
     with torch.no_grad():
         for data in data_iter:
@@ -93,42 +95,41 @@ def evaluate_accuracy_gpu(net, data_iter, device=None):
             X['bioinfo'] = x_bioinfo.cuda()
             if i == 1:
               zz0 =  torch.softmax(net(X),dim=1)
-              zzlabel0 = data['labels']
             else:
               zz =  torch.softmax(net(X),dim=1)
               zz0 = torch.cat((zz0,zz),0)
-              zzlabel = data['labels']
-              zzlabel0 = torch.cat((zzlabel0,zzlabel),0)
             i += 1
-    return zz0,zzlabel0
+    return zz0
   
 class assesmentDataset(Dataset):
-    def __init__(self, tokenizer, own_file_path, split = 'test', max_length=1200):
+    def __init__(self, tokenizer, own_file_path, max_length=1200):
         self.valFolderPath = own_file_path
         self.valFilePath = os.path.join(self.valFolderPath, 'own_data.csv')
         self.valbio = os.path.join(self.valFolderPath, 'own_data.fasta')
-        self.seqs, self.labels, self.bioinfo = self.load_dataset(self.valFilePath, self.valbio)
+        self.seqs, self.bioinfo = self.load_dataset(self.valFilePath, self.valbio)
         self.max_length = max_length
         self.tokenizer = tokenizer
 
     def load_dataset(self, path, biopath):
         df = pd.read_csv(path, header = 0)
         seq = list(df['seq'])
-        label = list(df['labels'])
+        # label = list(df['labels'])
         protein = iFeatureOmegaCLI.iProtein(biopath)
         protein.get_descriptor("PAAC")
         bio = protein.encodings
-        bioinfo1 = ((bio - bio.mean())/(bio.std())).values
+        # bioinfo1 = ((bio - bio.mean())/(bio.std())).values
+        bioinfo1 = bio.values
         protein.get_descriptor("CKSAAGP type 1")
         bio = protein.encodings
-        bioinfo2 = ((bio - bio.mean())/(bio.std())).values
+        # bioinfo2 = ((bio - bio.mean())/(bio.std())).values
+        bioinfo2 = bio.values
         bioinfo = np.concatenate((bioinfo1,bioinfo2),axis=1) 
         
-        assert len(seq) == len(label)
-        return seq, label, bioinfo
+        # assert len(seq) == len(label)
+        return seq, bioinfo
 
     def __len__(self):
-        return len(self.labels)
+        return len(self.seqs)
 
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
@@ -137,39 +138,41 @@ class assesmentDataset(Dataset):
         seq = re.sub(r"[UZOB]", "X", seq)
         seq_ids = self.tokenizer(seq, truncation=True, padding='max_length', max_length=self.max_length)
         sample = {key: torch.tensor(val) for key, val in seq_ids.items()}
-        sample['labels'] = torch.tensor(self.labels[idx])
+        # sample['labels'] = torch.tensor(self.labels[idx])
         sample['bioinfo'] = torch.tensor(self.bioinfo[idx], dtype=torch.float32)
 
         return sample
     
 own_data_path = sys.argv[1]
+# own_data_path = "own_dataset/"
+
 if not os.path.exists(own_data_path):
     print("own_data.csv and own_data.fasta files are not exist")
     sys.exit()
 
 print("the best model loading...")
-tokenizer = BertTokenizer.from_pretrained("Rostlab/prot_bert_bfd" )
+tokenizer = BertTokenizer.from_pretrained(bert_model_path)
 rnn_net = get_rnn(vocab_size = tokenizer.vocab_size, embed_size=64, num_hiddens=64, num_layers=2)
 embed_size, kernel_sizes, nums_channels = 1, [1, 2, 3, 4, 5, 6, 7, 8], [100, 100, 100, 100, 100, 100, 100, 100]
 cnn_net = TextCNN(tokenizer.vocab_size, embed_size, kernel_sizes, nums_channels)
 modeltest = bert_cla(cnn_net=cnn_net, rnn_net=rnn_net, n_classes=2)
      
 net = modeltest
-path_checkpoint = "/home/bli/logbacktrain/ProteinSolubilityPrediction/ProtSol/best_model/bestmodel.pkl"
+path_checkpoint = "best_model/bestmodel.pkl"
 checkpoint = torch.load(path_checkpoint)
 net.load_state_dict(checkpoint['net'], False)
 net.eval()
 devices = try_all_gpus()
 
 print("loading your own data ...")
-test_ass = assesmentDataset(tokenizer = tokenizer, own_file_path = own_data_path, split = 'val', max_length=1200)
+test_ass = assesmentDataset(tokenizer = tokenizer, own_file_path = own_data_path, max_length=1200)
 test_asses = DataLoader(test_ass, batch_size = 32, shuffle = False)
 zzz = evaluate_accuracy_gpu(net, test_asses, device=devices)
-y_hat = zzz[0].argmax(1).cpu().numpy()
+y_hat = zzz.argmax(1).cpu().numpy()
 
 csv_path = own_data_path + "own_data.csv"
 df = pd.read_csv(csv_path, header = 0)
 df = df.assign(y_hat=y_hat)
-df.to_csv(csv_path,index=False)
+df.to_csv(own_data_path + "own_data_prediction.csv",index=False)
 
-print("Prediction completed, plz check the ((y_hat_own_data.csv)) file in (own_dataset) folder")
+print("Prediction completed, plz check the ((own_data_prediction.csv)) file in (own_dataset) folder")

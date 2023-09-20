@@ -108,7 +108,7 @@ class Animator:
         #print('model is in processing...')
         display.display(self.fig)
         display.clear_output(wait=True)
-        plt.savefig("/home/bli/logbacktrain/ProteinSolubilityPrediction/DSolSSpecialdata_PAAC+CKSAAGP1200/trian.png")
+        plt.savefig("trian.png")
         
 def plot(X, Y=None, xlabel=None, ylabel=None, legend=None, xlim=None,
          ylim=None, xscale='linear', yscale='linear',
@@ -164,16 +164,16 @@ def set_axes(axes, xlabel, ylabel, xlim, ylim, xscale, yscale, legend):
     
 class SolubilityDatasetBio(Dataset):
     def __init__(self, tokenizer, split="train", max_length=512, batch_size = 4):
-        self.datasetFolderPath = '/home/bli/logbacktrain/ProteinSolubilityPrediction/ProtSol/dataset'
-        self.trainFilePath = os.path.join(self.datasetFolderPath, 'train_set.csv')
-        self.trainbio = os.path.join(self.datasetFolderPath, 'train_set.fasta')
-        self.testFilePath = os.path.join(self.datasetFolderPath, 'test_set.csv')
-        self.testbio = os.path.join(self.datasetFolderPath, 'test_set.fasta')
+        self.datasetFolderPath = 'data'
+        self.trainFilePath = os.path.join(self.datasetFolderPath, 'train_35509.csv')
+        self.trainbio = os.path.join(self.datasetFolderPath, 'train_35509.fasta')
+        self.testFilePath = os.path.join(self.datasetFolderPath, 'test_2706.csv')
+        self.testbio = os.path.join(self.datasetFolderPath, 'test_2706.fasta')
 
-        self.valFilePath = os.path.join(self.datasetFolderPath, 'nesg_test_set.csv')
-        self.valbio = os.path.join(self.datasetFolderPath, 'nesg_test_set.fasta')
-        self.val1FilePath = os.path.join(self.datasetFolderPath, 'DeepSoluE_test_set.csv')
-        self.val1bio = os.path.join(self.datasetFolderPath, 'DeepSoluE_test_set.fasta')
+        self.valFilePath = os.path.join(self.datasetFolderPath, 'nesg_1398.csv')
+        self.valbio = os.path.join(self.datasetFolderPath, 'nesg_1398.fasta')
+        self.val1FilePath = os.path.join(self.datasetFolderPath, '2001_test_1513.csv')
+        self.val1bio = os.path.join(self.datasetFolderPath, '2001_test_1513.fasta')
 
         self.tokenizer = tokenizer
         if split=="train":
@@ -295,7 +295,7 @@ def log_init():
     logger.setLevel(logging.INFO)
     consoleHandler = logging.StreamHandler()
     consoleHandler.setLevel(logging.DEBUG)
-    fileHandler = logging.FileHandler(filename = "/home/bli/logbacktrain/ProteinSolubilityPrediction/DSolSSpecialdata_PAAC+CKSAAGP1200/trainlog/acc.log")
+    fileHandler = logging.FileHandler(filename = "trainlog/acc.log")
     formatter = logging.Formatter("%(asctime)s|%(message)s",)
     consoleHandler.setFormatter(formatter)
     fileHandler.setFormatter(formatter)
