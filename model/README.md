@@ -1,2 +1,8 @@
-download all pre-train bert model file from https://drive.google.com/drive/folders/1rFk9gxXBTW8fNmsH-VifgjZaCDSFXX32?usp=drive_link
-and put it in this file folder.
+Downlaod all files from: https://huggingface.co/Rostlab/prot_bert_bfd/tree/main
+
+At least include the files below:
+config.json
+pytorch_model
+special_tokens_map.json
+tokenizer_config.json
+vocab.txt

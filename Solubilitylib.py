@@ -17,6 +17,7 @@ import matplotlib_inline
 from matplotlib_inline import backend_inline
 import iFeatureOmegaCLI
 import logging
+from Bio import SeqIO
 
 class Accumulator:
     """在n个变量上累加"""
@@ -106,9 +107,9 @@ class Animator:
             self.axes[0].plot(x, y, fmt)
         self.config_axes()
         #print('model is in processing...')
-        display.display(self.fig)
-        display.clear_output(wait=True)
-        plt.savefig("trian.png")
+        # display.display(self.fig)
+        # display.clear_output(wait=True)
+        # plt.savefig("/home/bli/bin_ProtSol/trian.png")
         
 def plot(X, Y=None, xlabel=None, ylabel=None, legend=None, xlim=None,
          ylim=None, xscale='linear', yscale='linear',
@@ -160,48 +161,40 @@ def set_axes(axes, xlabel, ylabel, xlim, ylim, xscale, yscale, legend):
     if legend:
         axes.legend(legend)
     axes.grid()
-    
-    
+
 class SolubilityDatasetBio(Dataset):
-    def __init__(self, tokenizer, split="train", max_length=512, batch_size = 4):
-        self.datasetFolderPath = 'data'
-        self.trainFilePath = os.path.join(self.datasetFolderPath, 'train_35509.csv')
-        self.trainbio = os.path.join(self.datasetFolderPath, 'train_35509.fasta')
-        self.testFilePath = os.path.join(self.datasetFolderPath, 'test_2706.csv')
-        self.testbio = os.path.join(self.datasetFolderPath, 'test_2706.fasta')
-
-        self.valFilePath = os.path.join(self.datasetFolderPath, 'nesg_1398.csv')
-        self.valbio = os.path.join(self.datasetFolderPath, 'nesg_1398.fasta')
-        self.val1FilePath = os.path.join(self.datasetFolderPath, '2001_test_1513.csv')
-        self.val1bio = os.path.join(self.datasetFolderPath, '2001_test_1513.fasta')
-
-        self.tokenizer = tokenizer
-        if split=="train":
-          self.seqs, self.labels, self.bioinfo = self.load_dataset(self.trainFilePath, self.trainbio)
-        elif split=="test":
-            self.seqs, self.labels, self.bioinfo = self.load_dataset(self.testFilePath, self.testbio)
-        elif split=="val":
-            self.seqs, self.labels, self.bioinfo = self.load_dataset(self.valFilePath, self.valbio)
-        else:
-          self.seqs, self.labels, self.bioinfo = self.load_dataset(self.val1FilePath, self.val1bio)
-        self.max_length = max_length
+    def __init__(self, biopath, tokenizer, max_length=512):
+        self.seqs, self.labels, self.bioinfo = self.load_dataset(biopath)
         
-    def load_dataset(self, path, biopath):
-        df = pd.read_csv(path, header = 0)
-        seq = list(df['seq'])
-        label = list(df['labels'])
+        self.tokenizer = tokenizer
+        self.max_length = max_length
+
+    def load_dataset(self, biopath):
+        sequences = []
+        labels = []
+        bioinfo_list = []
+
+        # 使用Biopython来解析fasta文件
+        for record in SeqIO.parse(biopath, "fasta"):
+            # 获取fasta标题，例如">97522|1|training"
+            title = record.description
+            # 从标题中提取标签，这里假设标签位于标题的第二部分，使用"|"分隔
+            label = int(title.split("|")[1])
+            # 获取氨基酸序列
+            sequence = str(record.seq)
+
+            sequences.append(sequence)
+            labels.append(label)
         protein = iFeatureOmegaCLI.iProtein(biopath)
         protein.get_descriptor("PAAC")
-        bio = protein.encodings
-        bioinfo1 = ((bio - bio.mean())/(bio.std())).values
+        bioinfo1 = protein.encodings
         protein.get_descriptor("CKSAAGP type 1")
-        bio = protein.encodings
-        bioinfo2 = ((bio - bio.mean())/(bio.std())).values
-        bioinfo = np.concatenate((bioinfo1,bioinfo2),axis=1) 
-        
-        assert len(seq) == len(label)
-        return seq, label, bioinfo
-    
+        bioinfo2 = protein.encodings
+        bioinfo_list = np.concatenate((bioinfo1,bioinfo2),axis=1) 
+
+        assert len(sequences) == len(labels)
+        return sequences, labels, bioinfo_list
+
     def __len__(self):
         return len(self.labels)
 
@@ -213,6 +206,49 @@ class SolubilityDatasetBio(Dataset):
         seq_ids = self.tokenizer(seq, truncation=True, padding='max_length', max_length=self.max_length)
         sample = {key: torch.tensor(val) for key, val in seq_ids.items()}
         sample['labels'] = torch.tensor(self.labels[idx])
+        sample['bioinfo'] = torch.tensor(self.bioinfo[idx], dtype=torch.float32)
+
+        return sample
+    
+class SolubilityDatasetBioPrediction(Dataset):
+    def __init__(self, biopath, tokenizer, max_length=512):
+        self.seqs, self.bioinfo = self.load_dataset(biopath)
+        
+        self.tokenizer = tokenizer
+        self.max_length = max_length
+
+    def load_dataset(self, biopath):
+        sequences = []
+        bioinfo_list = []
+
+        # 使用Biopython来解析fasta文件
+        for record in SeqIO.parse(biopath, "fasta"):
+            # 获取fasta标题，例如">97522|1|training"
+            title = record.description
+            # 从标题中提取标签，这里假设标签位于标题的第二部分，使用"|"分隔
+            # 获取氨基酸序列
+            sequence = str(record.seq)
+
+            sequences.append(sequence)
+        protein = iFeatureOmegaCLI.iProtein(biopath)
+        protein.get_descriptor("PAAC")
+        bioinfo1 = protein.encodings
+        protein.get_descriptor("CKSAAGP type 1")
+        bioinfo2 = protein.encodings
+        bioinfo_list = np.concatenate((bioinfo1,bioinfo2),axis=1) 
+
+        return sequences, bioinfo_list
+
+    def __len__(self):
+        return len(self.seqs)
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+        seq = " ".join("".join(self.seqs[idx].split()))
+        seq = re.sub(r"[UZOB]", "X", seq)
+        seq_ids = self.tokenizer(seq, truncation=True, padding='max_length', max_length=self.max_length)
+        sample = {key: torch.tensor(val) for key, val in seq_ids.items()}
         sample['bioinfo'] = torch.tensor(self.bioinfo[idx], dtype=torch.float32)
 
         return sample
@@ -241,6 +277,7 @@ def evaluate_accuracy(net, data_iter):  #@save
             y = data['labels'].cuda()
             metric.add(accuracy(net(X), y), y.numel())
     return metric[0] / metric[1]
+
 def evaluate_accuracy_gpu(net, data_iter, device=None):
     """使用GPU计算模型在数据集上的精度
 
@@ -264,38 +301,16 @@ def evaluate_accuracy_gpu(net, data_iter, device=None):
             metric.add(accuracy(net(X), y), y.numel())
     return metric[0] / metric[1]
 
-def train_batch(net, X, y, loss, trainer, devices):
-    if isinstance(X, dict):
-        # 微调BERT中所需
-        x_input_ids, x_token_type_ids, x_attention_mask = X['input_ids'], X['token_type_ids'], X['attention_mask']
-        x_bioinfo = X['bioinfo']
-        X = {}
-        X['input_ids'] = x_input_ids.cuda()
-        X['token_type_ids'] = x_token_type_ids.cuda()
-        X['attention_mask'] = x_attention_mask.cuda()
-        X['bioinfo'] = x_bioinfo.cuda()
-    else:
-        X = X.to(devices[0])
-    net.train()
-    trainer.zero_grad()
-    pred = net(X)
-    l = loss(pred, y)
-    l.sum().backward()
-    trainer.step()
-    train_loss_sum = l.sum()
-    train_acc_sum = accuracy(pred, y)
-    return train_loss_sum, train_acc_sum
-
 def init_weights(m):
     if type(m) == nn.Linear:
         nn.init.xavier_uniform_(m.weight)
 
-def log_init(): 
+def log_init(log_path ="./record/acc.log"): 
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     consoleHandler = logging.StreamHandler()
     consoleHandler.setLevel(logging.DEBUG)
-    fileHandler = logging.FileHandler(filename = "trainlog/acc.log")
+    fileHandler = logging.FileHandler(filename = log_path)
     formatter = logging.Formatter("%(asctime)s|%(message)s",)
     consoleHandler.setFormatter(formatter)
     fileHandler.setFormatter(formatter)

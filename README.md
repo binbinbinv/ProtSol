@@ -4,17 +4,19 @@ a novel approach to predict  the protein solubility based on the protein sequenc
 
 ## Files and folders:
 
-**best_model:** the best performing model
+**best_model:** the best performing model in paper
 
 **checkpoint:** stores the best breakpoints in the training process.
 
-**dataset:** the training set and test set used for training.
+**data:** the training set, test set, NESG set and Chang set used for training, testing and validation.
 
-**own_dataset:** the protein sequence used for prediction, please save it in csv and fasta format as in the example.
+**model:** the BERT model uesd for ProtSol.
 
-**trainlog:** used to record the performance of the model during training.
+**Predict:** the folder used for prediction, please provide the fasta format file as in the example.
 
-**own_data_tesing.py:** predicts the soluble tags corresponding to the amino acid sequences of the own dataset and outputs them to the file y_hat_own_data.csv.
+**record:** used to record the performance of the model during training.
+
+**predict.py:** predicts the soluble tags corresponding to the amino acid sequences of the own dataset and outputs them to the file y_hat_own_data.csv.
 
 **Solubilitylib.py:** some basic libraries for the model, mainly for data processing, both training and prediction will be used.
 
@@ -41,20 +43,22 @@ conda activate ProtSol
 cd ProtSol/
 ```
 
-## 1. Test your own data
+## 1. Predict your own sequences
 
 Example:
 
 ```shell
-python own_data_tesing.py own_dataset/
+python predict.py
 ```
 
-Put your protein data in the **own_dataset** folder, and make sure your data is in the same format as the example given.
+Put your protein data in fasta format in the **./Predict/NEED_TO_PREPARE/own_data.fasta** folder, and make sure your data is in the same format as the example given.
+
+You will get the output in ./Predict/Output.csv
 
 ## 2. Retrain the model
 
 If you wanna retrain the model, plz run the code below:
 
 ```shell
-nohub python -u train.py > train.log 2>&1 &
+python train.py
 ```
