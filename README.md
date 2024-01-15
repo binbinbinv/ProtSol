@@ -33,7 +33,7 @@ git clone git@github.com:binbinbinv/ProtSol.git
 and then install the environment through the code below, but make sure you have installed the conda or miniconda on your servicer:
 
 ```shell
-cd cd ProtSol/
+cd ProtSol/
 conda env create environment.yml
 ```
 
