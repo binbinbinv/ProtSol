@@ -33,6 +33,7 @@ git clone git@github.com:binbinbinv/ProtSol.git
 and then install the environment through the code below, but make sure you have installed the conda or miniconda on your servicer:
 
 ```shell
+cd cd ProtSol/
 conda env create environment.yml
 ```
 
@@ -45,13 +46,13 @@ cd ProtSol/
 
 ## 1. Predict your own sequences
 
-Example:
+Put your protein data in fasta format in the **./Predict/NEED_TO_PREPARE/own_data.fasta** folder, and make sure your data is in the same format as the example given.
+
+Then run the command below:
 
 ```shell
 python predict.py
 ```
-
-Put your protein data in fasta format in the **./Predict/NEED_TO_PREPARE/own_data.fasta** folder, and make sure your data is in the same format as the example given.
 
 You will get the output in ./Predict/Output.csv
 
