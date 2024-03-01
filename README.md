@@ -45,7 +45,7 @@ cd ProtSol/
 ```
 
 Plz make sure you have downloaded the files in the folder:  
-best_model
+best_model  
 model
 
 
