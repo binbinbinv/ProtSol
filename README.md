@@ -34,7 +34,7 @@ and then install the environment through the code below, but make sure you have 
 
 ```shell
 cd ProtSol/
-conda env create environment.yml
+conda env create -f environment.yml
 ```
 
 and then run ProtSol in the ProtSol envirionment:
