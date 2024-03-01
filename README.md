@@ -44,6 +44,11 @@ conda activate ProtSol
 cd ProtSol/
 ```
 
+Plz make sure you have downloaded the files in the folder:  
+best_model
+model
+
+
 ## 1. Predict your own sequences
 
 Put your protein data in fasta format in the **./Predict/NEED_TO_PREPARE/own_data.fasta** folder, and make sure your data is in the same format as the example given.
