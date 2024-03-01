@@ -27,7 +27,7 @@ a novel approach to predict  the protein solubility based on the protein sequenc
 If you wanna run this model on your own linux servicer, plz git clone the ProtSol throuth the code below:
 
 ```shell
-git clone git@github.com:binbinbinv/ProtSol.git
+git clone https://github.com/binbinbinv/ProtSol.git
 ```
 
 and then install the environment through the code below, but make sure you have installed the conda or miniconda on your servicer:
