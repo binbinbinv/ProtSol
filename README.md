@@ -45,9 +45,10 @@ cd ProtSol/
 ```
 
 Plz make sure you have downloaded the files in the folder:  
-best_model  
-model
-
+**best_model**  
+**model**
+    
+If you wanna run the predict.py and train.py on GPU, make sure your gpu has more than 24G of CUDA memory!
 
 ## 1. Predict your own sequences
 
