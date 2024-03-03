@@ -92,25 +92,21 @@ def get_rnn(vocab_size = 20, embed_size=64, num_hiddens=64, num_layers=2):
   net.apply(init_weights);
   return net
 
-def assement_accuracy_gpu(net, data_iter, device=None):
+def assement_accuracy(net, data_iter, device=None):
     """使用GPU计算模型在数据集上的精度
 
     Defined in :numref:`sec_lenet`"""
-    net.cuda()
     net.eval()  # 设置为评估模式
-    if isinstance(net, nn.Module):
-        if not device:
-            device = next(iter(net.parameters())).device
     i = 1
     with torch.no_grad():
         for data in tqdm(data_iter):
             x_input_ids, x_token_type_ids, x_attention_mask = data['input_ids'], data['token_type_ids'], data['attention_mask']
             x_bioinfo = data['bioinfo']
             X = {}
-            X['input_ids'] = x_input_ids.cuda()
-            X['token_type_ids'] = x_token_type_ids.cuda()
-            X['attention_mask'] = x_attention_mask.cuda()
-            X['bioinfo'] = x_bioinfo.cuda()
+            X['input_ids'] = x_input_ids.to(device)
+            X['token_type_ids'] = x_token_type_ids.to(device)
+            X['attention_mask'] = x_attention_mask.to(device)
+            X['bioinfo'] = x_bioinfo.to(device)
             if i == 1:
               zz0 =  torch.softmax(net(X),dim=1)
             else:
@@ -172,14 +168,19 @@ if __name__ == '__main__':
     print_box("Dataset for prediction loading completed!")
 
     net = modeltest
-    devices = try_all_gpus()
+    devices = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     path_bestmodel = bestmodel_path + "/bestmodel.pkl"
-    checkpoint = torch.load(path_bestmodel)
-    net.load_state_dict(checkpoint['net'])
-    net.cuda().eval()
+    if torch.cuda.is_available():
+       checkpoint = torch.load(path_bestmodel)
+       net.load_state_dict(checkpoint['net'])
+       net.cuda().eval()
+    else:
+       checkpoint = torch.load(path_bestmodel, map_location=torch.device('cpu'))
+       net.load_state_dict(checkpoint['net'])
+       net.eval()
     print_box("Prediciton BEGIN!!!")
 
-    y_scores = assement_accuracy_gpu(net, predict_iter, device=devices)
+    y_scores = assement_accuracy(net, predict_iter, device=devices)
 
     y_hat = list(y_scores.argmax(1).cpu().numpy())
     
@@ -188,7 +189,3 @@ if __name__ == '__main__':
     df.to_csv("./Predict/Output.csv", index=False)
 
     print_box("Prediction Completed and Check the Output.csv")
-    
-    
-
-
