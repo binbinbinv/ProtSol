@@ -24,7 +24,7 @@ A novel approach to predict  the protein solubility based on the protein sequenc
 
 ## 0. Environment
 
-If you wanna run this model on your own linux servicer, plz git clone the ProtSol throuth the code below:
+If you wanna run this model on your own linux servicer, plz git clone the ProtSol through the code below:
 
 ```shell
 git clone https://github.com/binbinbinv/ProtSol.git
