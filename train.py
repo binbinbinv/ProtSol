@@ -205,7 +205,7 @@ def train_batch(net, X, y, loss, trainer, devices, scaler):
     return train_loss_sum, train_acc_sum
 
 def main(net, train_iter, test_iter, val_iter, val1_iter, loss, trainer, num_epochs, start_epoch, devices, checkpoint_path, test_record_path, scaler):
-    logger = log_init()
+    logger = log_init(log_path="./log/train.log")
     timer, num_batches = Timer(), len(train_iter)
     animator = Animator(xlabel='epoch', xlim=[1, num_epochs], ylim=[0, 1],
                             legend=['train loss', 'train acc', 'test acc'])
@@ -257,10 +257,10 @@ if __name__ == '__main__':
     rnn_net = get_rnn(vocab_size = tokenizer.vocab_size, embed_size=64, num_hiddens=64, num_layers=2)
     embed_size, kernel_sizes, nums_channels = 1, [1, 2, 3, 4, 5, 6, 7, 8], [100, 100, 100, 100, 100, 100, 100, 100]
     cnn_net = kmersCNN(tokenizer.vocab_size, embed_size, kernel_sizes, nums_channels)
-    print("bert model loading...")
+    print_box("bert model loading...")
     modeltest = bert_cla(cnn_net=cnn_net, rnn_net=rnn_net, n_classes=2)
-    print("bert model loading completed...")
-    print("data loading...")
+    print_box("bert model loading completed...")
+    print_box("data loading...")
     
     train_path = "./data/train.fasta"
     test_path = "./data/test.fasta"
@@ -278,8 +278,8 @@ if __name__ == '__main__':
     val_iter = DataLoader(val_dataset, batch_size, shuffle = True)
     val1_iter = DataLoader(val1_dataset, batch_size, shuffle = True)
 
-    print("dataset load completed!")
-    print("TRIANING BEGIN!!!")
+    print_box("dataset loading completed!")
+    print_box("TRIANING BEGIN!!!")
 
     scaler = GradScaler() #训练前实例化一个GradScaler对象
 
@@ -308,6 +308,6 @@ if __name__ == '__main__':
         start_epoch = checkpoint['epoch']
 
 
-    test_record_path = "./record"
+    test_record_path = "./log"
     main(net, train_iter, test_iter, val_iter, val1_iter, loss, trainer, num_epochs, start_epoch, devices, checkpoint_path = checkpoint_path, test_record_path = test_record_path, scaler = scaler)
 
