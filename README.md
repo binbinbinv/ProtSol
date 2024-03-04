@@ -1,24 +1,24 @@
 # ProtSol
 
-a novel approach to predict  the protein solubility based on the protein sequence.
+A novel approach to predict  the protein solubility based on the protein sequence.
 
 ## Files and folders:
 
-**best_model:** the best performing model in paper
+**best_model:** the best performing model in paper.  
 
-**checkpoint:** stores the best breakpoints in the training process.
+**checkpoint:** stores the best breakpoints in the training process.  
 
-**data:** the training set, test set, NESG set and Chang set used for training, testing and validation.
+**data:** the training set, test set, NESG set and Chang set used for training, testing and validation.  
 
-**model:** the BERT model uesd for ProtSol.
+**model:** the BERT model uesd for ProtSol.  
 
-**Predict:** the folder used for prediction, please provide the fasta format file as in the example.
+**log:** the folder to save the train log.
 
-**record:** used to record the performance of the model during training.
+**Predict:** the folder used for prediction, please provide the fasta format file as in the example.  
 
-**predict.py:** predicts the soluble tags corresponding to the amino acid sequences of the own dataset and outputs them to the file y_hat_own_data.csv.
+**predict.py:** predicts the soluble tags corresponding to the amino acid sequences of the own dataset and outputs them to the file y_hat_own_data.csv.  
 
-**Solubilitylib.py:** some basic libraries for the model, mainly for data processing, both training and prediction will be used.
+**Solubilitylib.py:** some basic libraries for the model, mainly for data processing, both training and prediction will be used.  
 
 **train.py:** used for the model training process.
 
@@ -44,7 +44,7 @@ conda activate ProtSol
 cd ProtSol/
 ```
 
-Plz make sure you have downloaded the files in the folder:  
+Please make sure you have downloaded all files according to the readme file inside the corresponding folders.:  
 **best_model**  
 **model**
     
@@ -53,6 +53,8 @@ If you wanna run the predict.py and train.py on GPU, make sure your gpu has more
 ## 1. Predict your own sequences
 
 Put your protein data in fasta format in the **./Predict/NEED_TO_PREPARE/own_data.fasta** folder, and make sure your data is in the same format as the example given.
+
+Please do not change the name of the file "own_data.fasta". If you have multiple sequences, please place them all in one file named "own_data.fasta" as per the provided example.
 
 Then run the command below:
 
@@ -64,7 +66,9 @@ You will get the output in ./Predict/Output.csv
 
 ## 2. Retrain the model
 
-If you wanna retrain the model, plz run the code below:
+If you wanna retrain the model, please ensure that you have at least 24GB of available GPU memory. The training process lasts approximately 40 epochs, with each epoch taking at least 1 hour. In total, it will take around 2 days, depending on the computational power of your GPU.
+
+Then run the code below:
 
 ```shell
 python train.py
