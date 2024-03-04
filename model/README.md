@@ -1,4 +1,4 @@
-Downlaod all files from: https://huggingface.co/Rostlab/prot_bert_bfd/tree/main
+Downlaod all files from: https://huggingface.co/Rostlab/prot_bert_bfd/tree/main into this folder.
 
 At least include the files below:  
 config.json  
