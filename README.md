@@ -37,7 +37,18 @@ cd ProtSol/
 conda env create -f environment.yml
 ```
 
-and then run ProtSol in the ProtSol envirionment:
+If you encounter errors while installing the conda environment using the environment.yml file, please follow the instructions below and run each command one by one to install the ProtSol conda environment：
+
+```shell
+conda create -n ProtSol python=3.8
+conda activate ProtSol
+pip3 install torch torchvision torchaudio
+pip install pandas bio seaborn matplotlib_inline
+pip install scikit-learn transformers Ipython
+pip install iFeatureOmegaCLI rdkit
+```
+
+and then activate conda environment of ProtSol:
 
 ```shell
 conda activate ProtSol
