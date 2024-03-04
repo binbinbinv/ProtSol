@@ -135,17 +135,6 @@ def read_fasta(fasta_file):
         sequence = line.strip()
         data.append((id, sequence))
   return pd.DataFrame(data, columns=["id", "sequence"])
-
-def print_box(message):
-    box_width = 40
-    message = f" {message} "
-    padding = (box_width - len(message)) // 2
-    border = '*' * box_width
-    padding_str = '*' + ' ' * padding
-
-    print(border)
-    print(padding_str + message + ' ' * (box_width - len(padding_str) - len(message)) + '*')
-    print(border)
                 
 if __name__ == '__main__':
     tokenizer = BertTokenizer.from_pretrained(bert_model_path)
@@ -171,11 +160,13 @@ if __name__ == '__main__':
     devices = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     path_bestmodel = bestmodel_path + "/bestmodel.pkl"
     if torch.cuda.is_available():
-       checkpoint = torch.load(path_bestmodel)
+       checkpoint = torch.load(path_bestmodel, map_location=torch.device('cuda'))
+       checkpoint["net"].pop("bert.embeddings.position_ids")
        net.load_state_dict(checkpoint['net'])
        net.cuda().eval()
     else:
        checkpoint = torch.load(path_bestmodel, map_location=torch.device('cpu'))
+       checkpoint["net"].pop("bert.embeddings.position_ids")
        net.load_state_dict(checkpoint['net'])
        net.eval()
     print_box("Prediciton BEGIN!!!")
