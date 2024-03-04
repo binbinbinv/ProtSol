@@ -10,11 +10,9 @@ from transformers import BertTokenizer, BertModel
 import seaborn as sns
 import matplotlib.pyplot as plt
 import time
-from IPython import display
 import torch.nn as nn
 import re
 import matplotlib_inline
-from matplotlib_inline import backend_inline
 import iFeatureOmegaCLI
 import logging
 from Bio import SeqIO
@@ -317,3 +315,14 @@ def log_init(log_path ="./record/acc.log"):
     logger.addHandler(consoleHandler)
     logger.addHandler(fileHandler)
     return logger
+
+def print_box(message):
+    box_width = 40
+    message = f" {message} "
+    padding = (box_width - len(message)) // 2
+    border = '*' * box_width
+    padding_str = '*' + ' ' * padding
+
+    print(border)
+    print(padding_str + message + ' ' * (box_width - len(padding_str) - len(message)) + '*')
+    print(border)
