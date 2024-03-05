@@ -4,40 +4,40 @@ A novel approach to predict  the protein solubility based on the protein sequenc
 
 ## Files and folders:
 
-**best_model:** the best performing model in paper.  
+**best_model:** the best performing model in the paper.  
 
-**checkpoint:** stores the best breakpoints in the training process.  
+**checkpoint:** stores the best breakpoints during training.  
 
-**data:** the training set, test set, NESG set and Chang set used for training, testing and validation.  
+**data:**  Training set, test set, NESG set and Chang set for training, testing and validation.  
 
-**model:** the BERT model uesd for ProtSol.  
+**model:** BERT model uesd for ProtSol.  
 
-**log:** the folder to save the train log.
+**log:** the folder where the training logs are kept.
 
-**Predict:** the folder used for prediction, please provide the fasta format file as in the example.  
+**Predict:** folder for prediction, please provide the fasta format file in the example.  
 
-**predict.py:** predicts the soluble tags corresponding to the amino acid sequences of the own dataset and outputs them to the file y_hat_own_data.csv.  
+**predict.py:** predict the solubility label corresponding to the amino acid sequence of your own dataset, and output it to y_hat_own_data.csv file.  
 
-**Solubilitylib.py:** some basic libraries for the model, mainly for data processing, both training and prediction will be used.  
+**Solubilitylib.py:**  some basic libraries for the model, mainly used for data processing, both for training and prediction.  
 
-**train.py:** used for the model training process.
+**train.py:** used for model training process.
 
 ## 0. Environment
 
-If you wanna run this model on your own linux servicer, plz git clone the ProtSol through the code below:
+If you want to run this model in a standalone mode on your own system, git-clone ProtSol with the following code:
 
 ```shell
 git clone https://github.com/binbinbinv/ProtSol.git
 ```
 
-①and then install the environment through the code below, but make sure you have installed the conda or miniconda on your servicer:
+Then install the ProtSol environment with the following commands, but first make sure you have conda or miniconda installed on your server:
 
 ```shell
 cd ProtSol/
 conda env create -f environment.yml
 ```
 
-②If you encounter errors while installing the conda environment using the environment.yml file, please follow the instructions below and run each command one by one to install the ProtSol conda environment：
+If the automatic installation using environment.yml fails, you may install ProtSol manually by following the instructions:
 
 ```shell
 conda create -n ProtSol python=3.8
@@ -48,39 +48,39 @@ pip install scikit-learn transformers Ipython
 pip install iFeatureOmegaCLI rdkit
 ```
 
-and then activate conda environment of ProtSol:
+Then activate ProtSol's conda environment by issuing following command:
 
 ```shell
 conda activate ProtSol
 cd ProtSol/
 ```
 
-Please make sure you have downloaded all files according to the readme file inside the corresponding folders.:  
+To run the program, you need to go to each of the following two folders and follow the instructions in the Readme there to download and save the required data:  
 **best_model**  
 **model**
-    
-If you wanna run the predict.py and train.py on GPU, make sure your gpu has more than 24G of CUDA memory!
+
+**To run predict.py and train.py on the GPU, make sure that the GPU has more than 24G of CUDA memory!** 
 
 ## 1. Predict your own sequences
 
-Put your protein data in fasta format in the **./Predict/NEED_TO_PREPARE/own_data.fasta** folder, and make sure your data is in the same format as the example given.
+Place your own protein sequence in fasta format in the folder of ./Predict/NEED_TO_PREPARE/own_data.fasta and make sure your data is in the same format as the example given.
 
-Please do not change the name of the file "own_data.fasta". If you have multiple sequences, please place them all in one file named "own_data.fasta" as per the provided example.
+Do not change the file name "own_data.fasta". If you have more than one sequence, put them all into one file named "own_data.fasta" as per the example provided.
 
-Then run the command below:
+Then run the following command:
 
 ```shell
 python predict.py
 ```
 
-You will get the output in ./Predict/Output.csv
+predict.py can run on CPU and the predictions will be in the file ./Predict/Output.csv
 
 ## 2. Retrain the model
 
-If you wanna retrain the model, please ensure that you have at least 24GB of available GPU memory. The training process lasts approximately 40 epochs, with each epoch taking at least 1 hour. In total, it will take around 2 days, depending on the computational power of your GPU.
-
-Then run the code below:
+If you want to retrain the model, run the following code:
 
 ```shell
 python train.py
 ```
+
+The training process runs 40 epochs and it takes about 1 hour per epoch with nvidia 4090 24G.
