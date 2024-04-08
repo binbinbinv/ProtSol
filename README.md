@@ -30,14 +30,9 @@ If you want to run this model in a standalone mode on your own system, git-clone
 git clone https://github.com/binbinbinv/ProtSol.git
 ```
 
-Then install the ProtSol environment with the following commands, but first make sure you have conda or miniconda installed on your server:
+Then install the ProtSol environment with the following commands, but first make sure you have conda or miniconda installed on your server.
 
-```shell
-cd ProtSol/
-conda env create -f environment.yml
-```
-
-If the automatic installation using environment.yml fails, you may install ProtSol manually by following the instructions:
+Then you can install ProtSol environment manually by following the instructions:
 
 ```shell
 conda create -n ProtSol python=3.8
