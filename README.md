@@ -1,24 +1,24 @@
 # ProtSol
 
-A novel approach to predict  the protein solubility based on the protein sequence.
+A novel approach to predict  the protein solubility based on the protein sequence.  
 
-## Files and folders:
-
-**best_model:** the best performing model in the paper.  
-
-**checkpoint:** stores the best breakpoints during training.  
-
-**data:**  Training set, test set, NESG set and Chang set for training, testing and validation.  
-
-**model:** BERT model uesd for ProtSol.  
-
-**log:** the folder where the training logs are kept.
+## Files and folders:  
 
 **Predict:** folder for prediction, please provide the fasta format file in the example.  
 
-**predict.py:** predict the solubility label corresponding to the amino acid sequence of your own dataset, and output it to y_hat_own_data.csv file.  
+**best_model:** stores the best-performing model in the paper, you should download the best model by following the README.md in this folder.  
 
-**Solubilitylib.py:**  some basic libraries for the model, mainly used for data processing, both for training and prediction.  
+**checkpoint:** stores the best breakpoints during training, if you retrain the ProtSol model, the checkpoint file will be in here.  
+
+**data:**  stores the train set, test set, NESG set and Chang set for training, testing and validation, the data is in FASTA format and the labels have been contained in the description line by the '|' symbol, such as - ">2001test254|0" contains the label "0".  
+
+**model:** stores the pre-trained model ProtTrans used for ProtSol, you should download the model files by following the README.md in this folder.  
+
+**log:** the folder where logs during the training are kept.  
+
+**predict.py:** Predict the solubility label corresponding to the amino acid sequence of your own dataset, and you can get the result file - Output.csv in the Predict folder.  
+
+**Solubilitylib.py:**  stores some basic libraries for the model, mainly used for data processing, both for training and prediction.  
 
 **train.py:** used for model training process.
 
