@@ -39,7 +39,7 @@ conda create -n ProtSol python=3.8
 conda activate ProtSol
 pip install torch==2.2.2 torchvision torchaudio
 pip install pandas bio seaborn matplotlib_inline
-pip install scikit-learn transformers Ipython
+pip install scikit-learn transformers==4.39.3 Ipython
 pip install iFeatureOmegaCLI rdkit
 ```
 
